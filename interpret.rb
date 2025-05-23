@@ -1,10 +1,4 @@
-# https://ruby-doc.org/3.2.2/stdlibs/optparse/OptionParser.html
-
-# require 'optparse'
-# require 'optparse/time'
-# require 'ostruct'
-# require 'pp'
-# require 'cli/ui'
+require 'pp'
 require 'debug'
 
 class Scanner
@@ -15,12 +9,12 @@ class Scanner
     @tokens = []
   end
 
-  def scan
+  def tokenize
     state, prev_state = nil
     long_token = ""
     source.each_char do |char|
       state = nil
-      state = :word if char.match?(/[a-zA-Z]/)
+      state = :word if char.match?(/[a-zA-Z+]/) # make this into something correct for lisp
       state = :number if char.match?(/\d/)
       case state
       when :word
@@ -44,6 +38,7 @@ class Scanner
         long_token = ""
       end
     end
+    tokens
   end
 end
 
@@ -53,27 +48,32 @@ class Parser
 
   def initialize(tokens)
     @tokens = tokens
-    @ast = []
   end
 
   # [:"(", "first", :"(", "list", 1, :"(", :+, 2, 3, :")", 9, :")", :")"]
   def parse
-    until tokens.empty?
-      current = tokens.shift
-      # case current
-      #   # handle based on type of token here
-      # end
-    end
-  end
-
-  def parse_expression
-    if :open
-
+    current = tokens.first
+    case current
+    when Integer, String
+      tokens.shift
+    when :"("
+      node = []
+      tokens.shift
+      until tokens.first == :")"
+        node << parse
+      end
+      tokens.shift
+      node
+    else
+      raise "Idk this token!"
     end
   end
 end
 
-class Lisp
+class Interpreter
   raise "Too many arguments!" if ARGV.length > 1
-  Scanner.new(ARGV[0]).scan
+  tokens = Scanner.new(ARGV[0]).tokenize
+  puts "Tokens are #{tokens}"
+  parsed = Parser.new(tokens).parse
+  pp parsed
 end
