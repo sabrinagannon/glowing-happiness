@@ -16,39 +16,59 @@ class Scanner
   end
 
   def scan
-    state = nil
+    state, prev_state = nil
     long_token = ""
     source.each_char do |char|
-      case char
-      when "("
-        state = nil
-        tokens << long_token unless long_token.empty?
-        long_token = ""
-        tokens << :open
-      when ")"
-        state = nil
-        tokens << long_token unless long_token.empty?
-        long_token = ""
-        tokens << :close
-      when /[a-zA-Z]/
-        raise "Syntax error!" if state == :number
-        state = :word if state.nil?
-        long_token << char
-      when /\d/
-        raise "Syntax error!" if state == :word
-        state = :number if state.nil?
-        long_token << char
+      state = nil
+      state = :word if char.match?(/[a-zA-Z]/)
+      state = :number if char.match?(/\d/)
+      case state
+      when :word
+          raise "Syntax error!" if prev_state == :number
+          prev_state = :word
+          long_token << char
+      when :number
+          raise "Syntax error!" if prev_state == :word
+          prev_state = :number
+          long_token << char
       else
-        state = nil
-        tokens << long_token unless long_token.empty?
-        tokens << char unless char.match?(/\s/)
+        long_token = if prev_state == :number
+
+                       long_token.to_i
+                     else
+                       long_token
+                     end
+        state, prev_state = nil
+        tokens << long_token unless !long_token.is_a?(Integer) && long_token.empty?
+        tokens << char.to_sym unless char.match?(/\s/)
         long_token = ""
       end
     end
   end
+end
 
-  def lex
-    tokens.each do |token|
+
+class Parser
+  attr_accessor :tokens, :ast
+
+  def initialize(tokens)
+    @tokens = tokens
+    @ast = []
+  end
+
+  # [:"(", "first", :"(", "list", 1, :"(", :+, 2, 3, :")", 9, :")", :")"]
+  def parse
+    until tokens.empty?
+      current = tokens.shift
+      # case current
+      #   # handle based on type of token here
+      # end
+    end
+  end
+
+  def parse_expression
+    if :open
+
     end
   end
 end
