@@ -3,13 +3,20 @@ require 'debug'
 require_relative 'errors'
 
 class Parser
-  attr_accessor :tokens
+  attr_accessor :tokens, :ast
 
   def initialize(tokens)
     @tokens = tokens
   end
 
   def parse
+    ast = consume
+
+    raise SyntaxError.new("Missing opening bracket") if tokens.any?
+    ast
+  end
+
+  def consume
     current = tokens.first
     case current
     when Integer, String
@@ -18,7 +25,7 @@ class Parser
       node = []
       tokens.shift
       until tokens.first == :")"
-        node << parse
+        node << consume
       end
       tokens.shift
       node

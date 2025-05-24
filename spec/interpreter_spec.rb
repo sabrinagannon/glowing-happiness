@@ -18,7 +18,10 @@ RSpec.describe Interpreter do
 
     context "when the input string is missing an opening bracket" do
       it "raises a syntax error" do
-        skip 'TODO'
+        input = "())"
+        expect do
+          described_class.eval(input)
+        end.to raise_error(SyntaxError)
       end
     end
 
