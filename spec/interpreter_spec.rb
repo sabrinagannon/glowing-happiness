@@ -9,10 +9,10 @@ RSpec.describe Interpreter do
 
     context "when the input string is missing a closing bracket" do
       it "raises a syntax error" do
-        input = "(first (list 1 (+ 2 3) 9)"
+        input = "("
         expect do
           described_class.eval(input)
-        end.to raise_error(SyntaxError)
+        end.to raise_error(SyntaxError, 'Missing closing bracket')
       end
     end
 
@@ -21,7 +21,7 @@ RSpec.describe Interpreter do
         input = "())"
         expect do
           described_class.eval(input)
-        end.to raise_error(SyntaxError)
+        end.to raise_error(SyntaxError, 'Missing opening bracket')
       end
     end
 
